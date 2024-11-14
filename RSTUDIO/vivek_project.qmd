@@ -1,0 +1,290 @@
+---
+title: "Project Report"
+author: "Vivek George Varghese"
+format: html
+editor: visual
+---
+
+Contents
+
+Introduction......................................................................................................................2
+
+Brief Analysis. ...................................................................................................................3
+
+Conclusion.........................................................................................................................16
+
+**Introduction**
+
+This report provides an analysis of a dataset consisting of car insurance policy information, including variables such as marital status, age, gender, car value, years of no claims bonus, annual mileage, payment method, acquisition channel, years of tenure with the current insurance provider, price, actual change in price compared to the previous year, the percentage change in price compared to the previous year, grouped change in price, and renewal status. The dataset contains 20,020 observations.
+
+Key findings from the analysis include:
+
+1.  Demographic Factors: Age, marital status, and gender have an impact on car insurance premiums. Younger drivers typically pay higher premiums; marital status and gender can also influence insurance costs.
+
+2.  Vehicle Value: Car value is positively correlated with insurance premiums. Higher-value vehicles often result in higher premiums due to increased replacement and repair costs.
+
+3.  No Claims Bonus and Annual Mileage: The number of years with a no-claims bonus significantly impacts insurance premiums. Policyholders with longer claim-free periods are likely to enjoy lower premiums. Annual mileage is another influential factor, with higher mileage typically leading to higher insurance costs.
+
+4.  Payment Method and Acquisition Channel: The chosen payment method and acquisition channel can indirectly affect insurance premiums. Different payment methods and channels may influence the perceived risk associated with a policy, potentially impacting pricing.
+
+5.  Customer Renewal Behaviour: The analysis indicates that approximately 62% of customers in the dataset renewed their car insurance policies. This suggests a moderate level of customer loyalty within the market.
+
+This summary provides an overview of the key findings derived from an analysis of a dataset containing information related to car insurance policies. It will also provide recommendations based on these findings, suggesting actionable steps that insurers can take to optimize their pricing models, enhance customer satisfaction, and foster long-term customer loyalty. Understanding the key findings and implementing the recommended strategies can assist insurance companies in developing more accurate pricing models that consider demographic factors, vehicle value, no-claims bonuses, and annual mileage. By tailoring premiums to individual risk profiles and offering incentives for safe driving behaviour, insurers can improve customer satisfaction and retention rates.
+
+Overall, this summary provides a comprehensive overview of the dataset analysis, emphasizing the importance of considering various factors in insurance pricing and customer management. The findings and recommendations presented here aim to support insurers in optimizing their strategies and better serving their customers in the competitive car insurance market.
+
+**Brief Analysis**
+
+1\. **Load the dataset**: The line library('readxl') loads the readxl package in R. This package provides functions to read data from Excel files.
+
+The line, data = read_excel(file.choose()) prompts the user to select an Excel file using a file chooser dialog. The read_excel() function is then used to read the selected Excel file and store the data in the data variable.
+
+```{r}
+library('readxl')
+data=read_excel("C:/Users/91812/Downloads/insurance_data_2023.xlsx")
+data
+```
+
+2.  the **View(data )** function is used to open a separate window or pane to display the contents of an object, typically a data frame. It provides a convenient way to visually inspect and explore the
+    data.
+
+```{r}
+#| echo: false
+View(data)
+
+```
+
+-    head(data)
+
+    ```{r}
+    head(data)
+    ```
+
+summary(data)
+
+```{r}
+summary(data)
+```
+
+5.  frequency table named **tab1** based on the values in the "Renewed." column of the **data** data frame.
+
+    ```{r}
+    tab1<-table(as.factor(data$'Renewed?'))
+    tab1
+    ```
+
+6. To retrieve the levels of a factor variable in R, you can use the **levels().**
+
+```{r}
+levels(as.factor(data$'Marital Status'))
+levels(as.factor(data$'Gender'))
+levels(as.factor(data$'Payment Method'))
+levels(as.factor(data$'Acquisition Channel'))
+levels(as.factor(data$'Renewed?'))
+```
+
+[**EDA plots**]{.underline}
+
+7. **Correlation of the  Entire data**
+
+```{r}
+a<-cor(data[, unlist(lapply(data, is.numeric))])
+library("ggcorrplot")
+ggcorrplot(a,lab=TRUE)
+
+```
+
+[**Boxplots**]{.underline}
+
+```{r}
+boxplot(data$'AGE', xlab='Age')
+```
+
+```{r}
+boxplot(data$'Car Value',xlab='carvalue')
+```
+
+```{r}
+boxplot(data$'Years of No Claims Bonus', xlab='Years of No Claims Bonus')
+```
+
+**Comparison between renewed and Years of No.claims. Bonus**
+
+creating a contingency table named **tab2**. The **table()** function is used to generate a
+cross-tabulation of the factors **as.factor(data\$Renewed.)** and **data\$Years.of.No.Claims.Bonus**. The **dnn** parameter is used to assign names to the dimensions of the table.
+
+```{r}
+tab2<-table(as.factor(data$'Renewed?'),data$'Years of No Claims Bonus',
+            dnn = c("Renewed","Years of No Claims Bonus"))
+tab2
+
+```
+
+to calculate the proportions of each combination of levels in the contingency table **tab2**. The **prop.table()** function without any arguments will calculate the proportions for the entire table.
+
+```{r}
+prop.table(tab2)*100
+```
+
+**Using ggplot to represent**
+
+```{r}
+library(ggplot2)
+ggplot()+geom_bar(data=data,aes(x=factor(data$'Years of No Claims Bonus'),fill=factor(data$'Renewed?')),position='fill')+scale_x_discrete('years')+scale_y_continuous('percent')+guides(fill=guide_legend(title='Renewed'))+scale_fill_manual(values = c('green','yellow'))
+
+```
+
+**Renewed with Payment method**
+
+```{r}
+tab3<-table(as.factor(data$'Renewed?'),data$'Payment Method',
+            dnn = c("Renewed","payment method"))
+tab3
+prop.table(tab2)*100
+```
+
+**Applying the Logistic Regression Model:**
+
+```{r}
+lr_model<-glm(data$'Renewed?'~data$'AGE'+data$'Car Value'+data$'Years of No Claims Bonus'
++data$'Annual Mileage' +data$'Years of Tenure with Current Provider' +data$'Price',data = data,
+family = "binomial")
+
+summary(lr_model)
+
+
+```
+
+The above result displays the estimated coefficients for each predictor variable in the model. The Estimate column provides the estimated coefficient values and the Std. Error column gives the standard errors of the estimates, the z-value column shows the z-statistics for the coefficients, and the Pr(\>\|z\|) column displays the p-values associated with each coefficient. These p-values can be used to assess the statistical significance of the predictor variables.
+
+**Signif. codes**: This section provides the significance levels for the p-values in the Coefficients table. The codes indicate the level of significance, where '' indicates p \< 0.001, '' indicates p \< 0.01, ''
+indicates p \< 0.05, '.' indicates p \< 0.1, and ' ' indicates p ≥ 0.1.
+
+**AIC**: The Akaike Information Criterion (AIC) is a measure of the model's quality. It
+takes into account the model's fit and complexity, with lower values indicating
+better models. In this case, the AIC is 25993.
+
+Looking at the
+"Pr(\>\|z\|)" column from the output, we can see the following p-values for each predictor variable:
+
+**AGE:** The p-value is 0.400751, which is greater than 0.05. This suggests that the "AGE"
+variable may not be statistically significant in predicting
+"Renewed".
+
+**Car.Value**: The p-value is 0.243556, which is greater than 0.05. Therefore, the "Car.Value"
+variable may not be statistically significant in predicting "Renewed".
+
+**Years.of.No.Claims.Bonus**: The p-value is \< 0.001, indicating that the "Years.of.No.Claims.Bonus" variable is highly statistically significant in predicting "Renewed".
+
+**Annual.Mileage**: The p-value is 0.000171, which is less than 0.05. This suggests that the
+"Annual.Mileage" variable is statistically significant in predicting "Renewed".
+
+**Years.of.Tenure.with.Current.Provider**:The p-value is \< 0.001, indicating that the "Years.of.Tenure.with.Current.Provider" variable is highly statistically significant in predicting "Renewed".
+
+**Price**: The p-value is \< 0.001, suggesting that the "Price" variable is highly statistically significant in predicting "Renewed".
+
+Based on the p-values, the "Years.of.No.Claims.Bonus", "Annual.Mileage", "Years.of.Tenure.with.Current.Provider", and "Price" variables appear to be the most significant predictors of the "Renewed" response variable. The "AGE" and "Car.Value" variables may not be statistically significant in this model.
+
+**Improving the model by removing the insignificant variable.**
+
+```{r}
+improved_lr_model <- glm(data$'Renewed?' ~    data$'Years of No Claims Bonus' +data$'Annual Mileage' + data$'Years of Tenure with Current Provider' +data$'Price',data = data, family = "binomial")
+
+summary(improved_lr_model)
+```
+
+**1. Which factors have the greatest effect on renewal rate?**
+
+Customer tenure has been widely recognized as a significant determinant of customer loyalty and retention in various industries, including insurance. Customer tenure can be seen as an indicator of the customer-provider relationship's strength and stability. The longer a customer has remained with an insurance provider, the more likely they are to have developed a level of trust and satisfaction. This trust and satisfaction are built on positive experiences, reliable service, and the perceived value of insurance coverage. Over time, customers may become more comfortable and familiar with their
+insurance provider, making them less likely to switch to a competitor.
+
+Based correlation matrix, the factor with the greatest effect on the renewal rate is "Years.of.Tenure.with.Current.Provider" with a correlation coefficient of 0.07351143. This suggests that customers who have been with their current insurance provider for a longer duration are more likely to renew their insurance policies. Therefore, insurance companies should recognize the importance of building long-term relationships with customers and focus on strategies that enhance customer loyalty and satisfaction. By prioritizing customer retention efforts and providing personalized services, insurance
+companies can leverage customer tenure as a key factor in maintaining a stable and profitable customer base.
+
+2 .**How does price relate to renewal rates?**
+
+```{r}
+test=chisq.test(data$'Price',data$`Renewed?`,simulate.p.value = TRUE)
+test
+```
+
+Based on the chi-squared test results the p-value is 0.0004998, which is less than the typical significance level of 0.05. Therefore, we can conclude that there is a significant association between the "Price" and "Renewed" variables.
+
+However, the chi-squared test does not provide information about the direction or strength of the relationship. It only indicates that there is a relationship between the variables.
+
+Based on the logistic regression model coefficients provided, the "Price" variable has a coefficient
+estimate of -0.001360. This indicates that for every unit increase in price, the log-odds of renewal decrease by 0.001360.
+
+Since the coefficient is negative, it suggests that there is a negative relationship between price and renewal rates. In other words, as the price of the insurance policy increases, the likelihood of renewal decreases.
+
+The significance of the coefficient can be determined by looking at the corresponding p-value, which is \< 0.001 in this case. The small p-value indicates that the coefficient for "Price" is statistically significant, suggesting that the relationship between price and renewal rates is unlikely to occur by chance.
+
+**3.** **What are the key factors that affect customers' response to price increase (also seen as price
+elasticity)? In this case price elasticity should be defined as the impact that changes in price  have on a customer's likelihood to renew.**
+
+Price sensitivity: Customers' sensitivity to price changes is a crucial factor in determining
+their response to a price increase. Some customers may be highly price-sensitive, meaning they are more likely to consider alternative options or switch providers if the price increases. On the other hand, less
+price-sensitive customers may be more willing to absorb the price increase without significantly affecting their likelihood to renew.
+
+Perceived value: The perceived value of the insurance policy plays a significant role in
+customers' response to a price increase. If customers perceive that the benefits, coverage, and service provided by the policy are worth the increased price, they are more likely to renew despite the price change. Conversely, if customers feel that the value they receive does not justify the higher price,
+they may be more inclined to seek alternative options.
+
+Competitor pricing: Customers' response to a price increase can be influenced by the
+pricing strategies of competitors. If competing insurance providers offer similar policies at lower prices, customers may be more inclined to switch providers in response to a price increase. Conversely, if competitors also increase their prices, customers may be less likely to switch and more likely to renew with their current provider.
+
+Customer loyalty and satisfaction: The level of customer loyalty and satisfaction with the insurance provider can impact their response to a price increase. Highly loyal customers who have had positive experiences with the provider may be more willing to renew despite a price increase. Conversely, dissatisfied or less loyal customers may view the price increase as an additional reason to switch
+providers.
+
+Availability of alternatives: The availability and attractiveness of alternative insurance options in the market can influence customers' response to a price increase. If customers have numerous viable alternatives that offer comparable benefits and service at lower prices, they may be more likely to switch providers. However, if suitable alternatives are limited or not as attractive, customers may be more inclined to renew despite the price increase.
+
+Communication and transparency: The way the price increase is communicated to customers and the transparency of the reasons behind it can impact their response. Clear and effective communication, along
+with transparent explanations about the factors driving the price increase, can help customers understand the rationale behind it. This, in turn, may positively influence their likelihood to renew despite the higher price.
+
+It's important to note that the relative importance and impact of these factors can vary depending on the specific context and characteristics of the insurance market and customer segments. Therefore, it's
+crucial for insurance providers to analyze their specific customer base and market dynamics to understand the key factors that affect customers' response to a price increase and their likelihood to renew.
+
+**2**.**What advice would you give to this company on how they might think about pricing
+these customers?**
+
+1\. Consider the impact of price on renewal rates: The logistic regression analysis indicates that price has a significant effect on renewal rates. It is important for the company to carefully consider the relationship between price and renewal rates when setting prices for these customers.
+
+2\. Assess price elasticity: Price elasticity, or the responsiveness of customers to changes in price, is a key factor in determining the impact of price on renewal rates. The company should conduct further analysis to estimate price elasticity and understand how sensitive customers are to price changes. This can help in
+setting appropriate pricing strategies and understanding the potential impact on customer retention.
+
+3.Analyze customer segments: Different customer segments may have varying price sensitivities and renewal behaviours. The company should segment its customer base and analyse how different segments respond to price changes. This analysis can provide insights into the pricing strategies that are most effective for each segment and help tailor pricing approaches accordingly.
+
+4. Consider value-based pricing: The perceived value of the insurance policy is an important factor influencing customers' response to price changes. The company should evaluate the value proposition of its offerings and align pricing with the perceived value. If customers see the benefits and coverage provided as valuable and worth the price, they are more likely to renew even in the face of
+a price increase.
+
+5\. Monitor and respond to competitor pricing: Competitor pricing can impact customers'
+likelihood to renew. The company should closely monitor competitor pricing
+strategies and market dynamics to ensure its prices remain competitive. If
+competitors lower their prices significantly, the company may need to adjust
+its pricing strategy to retain customers.
+
+6. Focus on customer satisfaction and loyalty: Customer satisfaction and loyalty play a crucial role in customer retention. The company should prioritize customer service, quality of coverage, and overall customer experience to enhance customer satisfaction and foster loyalty. Satisfied and loyal customers are
+more likely to renew despite price increases.
+
+7.Communicate effectively: Clear and transparent communication is essential when implementing
+price changes. The company should clearly communicate the reasons behind price
+increases and the value customers can expect to receive. Effective
+communication can help customers understand the rationale and minimize negative
+perceptions associated with price changes.
+
+8\. Test and monitor pricing strategies: Pricing is an iterative process, and the
+company should continuously test and monitor different pricing strategies. This
+can involve conducting pricing experiments, analyzing the impact of price
+changes on renewal rates, and making adjustments as necessary to optimize
+pricing for customer retention.
+
+By considering these factors and implementing appropriate pricing strategies, the company can
+effectively manage the impact of price on customer renewal rates and maximize customer
+retention.
+
+# **Conclusion**
+
+In conclusion, the analysis of motor insurance data yielded important insights into the factors influencing renewal rates and the interplay between price and customer retention. Key findings emphasized the significance of tenure with the current provider in driving renewal rates, emphasizing the need for long-term relationship building. The analysis also highlighted the negative association between price increases and renewal rates, underlining the importance of carefully considering pricing decisions. Understanding price elasticity and factors influencing customer responses to pricing changes, such as price sensitivity, perceived value, and competitor pricing, is crucial for effective pricing strategies. Recommendations include evaluating price elasticity, segmenting customers, aligning pricing with perceived value, monitoring competitors, prioritizing customer satisfaction and loyalty, ensuring transparent communication, and regularly refining pricing approaches. By implementing these recommendations, the client can optimize customer retention, profitability, and market competitiveness, taking into account the dynamic nature of motor insurance pricing. The analytical insights obtained provide a valuable foundation for the client to make informed pricing decisions and maintain a
+competitive edge in the market.
+
+ 
