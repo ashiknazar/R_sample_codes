@@ -3,7 +3,7 @@ data = cars
 data
 plot(data$speed,data$dist)
 #splitting the datset into training and testing
-#install.packages('caTools')
+install.packages('caTools')
 library(caTools)
 split = sample.split(data$speed,SplitRatio = 0.70)
 split

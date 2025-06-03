@@ -1,6 +1,6 @@
 
 #
-
+install.packages("ISLR")
 library(ISLR)
 head(iris)
 
